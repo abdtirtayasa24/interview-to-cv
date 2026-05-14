@@ -2,10 +2,12 @@ import os
 import tempfile
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from auth import get_current_user, supabase
 from media_service import extract_audio
 from ai_service import process_audio_with_gemini
+from docx_service import generate_custom_pdf
 
 app = FastAPI(title="AI CV Generator API")
 
@@ -85,3 +87,31 @@ def process_media(request: ProcessMediaRequest, user = Depends(get_current_user)
                     os.remove(path)
                 except:
                     pass
+
+@app.delete("/api/cleanup-media")
+async def cleanup_media(file_path: str, user = Depends(get_current_user)):
+    """
+    Deletes the media file from Supabase Storage after download.
+    """
+    if not file_path.startswith(f"{user.id}/"):
+        raise HTTPException(status_code=403)
+    
+    supabase.storage.from_('temp_media').remove([file_path])
+    return {"status": "deleted"}
+
+@app.post("/api/generate-custom-cv")
+async def generate_custom_cv(history_id: str, template_id: str, user = Depends(get_current_user)):
+    res = supabase.table("conversion_history").select("*").eq("id", history_id).single().execute()
+    cv_data = res.data['json_data']
+
+    tpl_res = supabase.table("templates").select("*").eq("id", template_id).single().execute()
+    tpl_path = tpl_res.data['storage_path']
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmp:
+        t_data = supabase.storage.from_('user_templates').download(tpl_path)
+        tmp.write(t_data)
+        local_tpl = tmp.name
+
+    pdf_path = generate_custom_pdf(local_tpl, cv_data)
+    
+    return FileResponse(pdf_path, media_type='application/pdf', filename="Custom_CV.pdf")
