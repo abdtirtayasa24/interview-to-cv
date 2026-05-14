@@ -2,3 +2,5 @@
 .env
 node_modules
 .env.local
+.next
+__pycache__
