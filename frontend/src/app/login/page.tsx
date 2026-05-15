@@ -74,11 +74,11 @@ export default function LoginPage() {
               <div className="mt-8 grid gap-3 text-sm text-slate-700">
                 <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-100/70 p-4">
                   <ShieldCheck className="h-5 w-5 text-blue-700" />
-                  Authenticated access keeps each user scoped to their own records.
+                  Authenticated access.
                 </div>
                 <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-100/70 p-4">
                   <Mail className="h-5 w-5 text-blue-700" />
-                  Passwordless email OTP keeps login quick for production use.
+                  Passwordless email OTP.
                 </div>
               </div>
             </div>
@@ -147,7 +147,7 @@ export default function LoginPage() {
                       value={otp}
                       onChange={(e) => setOtp(e.target.value)}
                       className="mt-2 block w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2.5 text-sm text-slate-950 shadow-sm transition placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                      placeholder="123456"
+                      placeholder="12345678"
                     />
                   </div>
                   <button
